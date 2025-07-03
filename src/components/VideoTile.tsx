@@ -1,6 +1,6 @@
-
 import React, { useEffect } from 'react';
 import { MicOff } from 'lucide-react';
+import AudioWave from './AudioWave';
 
 interface VideoTileProps {
   videoRef?: React.RefObject<HTMLVideoElement>;
@@ -9,6 +9,7 @@ interface VideoTileProps {
   name: string;
   fallbackLetter: string;
   className?: string;
+  isUserSpeaking?: boolean;
 }
 
 const VideoTile: React.FC<VideoTileProps> = ({
@@ -17,7 +18,8 @@ const VideoTile: React.FC<VideoTileProps> = ({
   isMicMuted,
   name,
   fallbackLetter,
-  className = "w-[240px] h-[160px]"
+  className = "w-[240px] h-[160px]",
+  isUserSpeaking = false
 }) => {
   // Ensure video element updates when camera state changes
   useEffect(() => {
@@ -56,9 +58,10 @@ const VideoTile: React.FC<VideoTileProps> = ({
         </div>
       )}
       
-      {/* Name label */}
-      <div className="absolute bottom-2 left-2">
+      {/* Name label with audio wave */}
+      <div className="absolute bottom-2 left-2 flex items-center space-x-2">
         <span className="text-white text-xs font-medium">{name}</span>
+        <AudioWave isActive={isUserSpeaking && !isMicMuted} />
       </div>
     </div>
   );

@@ -1,13 +1,27 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import VideoTile from '../components/VideoTile';
 import ControlPanel from '../components/ControlPanel';
+import AudioWave from '../components/AudioWave';
+import CurrentTime from '../components/CurrentTime';
 
 const Index = () => {
   const [isMicMuted, setIsMicMuted] = useState(false);
   const [isCameraOff, setCameraOff] = useState(false);
   const [stream, setStream] = useState<MediaStream | null>(null);
+  const [isUserSpeaking, setIsUserSpeaking] = useState(false);
+  const [isJuliaSpeaking, setIsJuliaSpeaking] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const audioContextRef = useRef<AudioContext | null>(null);
+  const analyserRef = useRef<AnalyserNode | null>(null);
+
+  // Simulate Julia speaking randomly for demo purposes
+  useEffect(() => {
+    const juliaTimer = setInterval(() => {
+      setIsJuliaSpeaking(prev => !prev);
+    }, Math.random() * 3000 + 2000); // Random interval between 2-5 seconds
+
+    return () => clearInterval(juliaTimer);
+  }, []);
 
   useEffect(() => {
     const getUserMedia = async () => {
@@ -20,6 +34,9 @@ const Index = () => {
         if (videoRef.current) {
           videoRef.current.srcObject = mediaStream;
         }
+
+        // Set up audio analysis for voice activity detection
+        setupAudioAnalysis(mediaStream);
       } catch (error) {
         console.error('Error accessing camera:', error);
       }
@@ -31,8 +48,43 @@ const Index = () => {
       if (stream) {
         stream.getTracks().forEach(track => track.stop());
       }
+      if (audioContextRef.current) {
+        audioContextRef.current.close();
+      }
     };
   }, []);
+
+  const setupAudioAnalysis = (mediaStream: MediaStream) => {
+    try {
+      const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+      const analyser = audioContext.createAnalyser();
+      const microphone = audioContext.createMediaStreamSource(mediaStream);
+      
+      analyser.fftSize = 256;
+      const bufferLength = analyser.frequencyBinCount;
+      const dataArray = new Uint8Array(bufferLength);
+      
+      microphone.connect(analyser);
+      
+      audioContextRef.current = audioContext;
+      analyserRef.current = analyser;
+      
+      const checkAudioLevel = () => {
+        if (analyser && !isMicMuted) {
+          analyser.getByteFrequencyData(dataArray);
+          const average = dataArray.reduce((a, b) => a + b) / bufferLength;
+          setIsUserSpeaking(average > 10); // Threshold for voice activity
+        } else {
+          setIsUserSpeaking(false);
+        }
+        requestAnimationFrame(checkAudioLevel);
+      };
+      
+      checkAudioLevel();
+    } catch (error) {
+      console.error('Error setting up audio analysis:', error);
+    }
+  };
 
   const toggleMic = () => {
     setIsMicMuted(!isMicMuted);
@@ -68,21 +120,25 @@ const Index = () => {
         <span className="text-white text-sm font-medium">Lemonn.ai</span>
       </div>
 
+      {/* Current Time */}
+      <CurrentTime />
+
       {/* Main Content */}
       <div className="flex-1 flex items-center justify-center relative">
-        {/* Main Video Area - Julia - increased height by 25px and changed to purple */}
+        {/* Main Video Area - Julia */}
         <div className="w-[70%] max-w-[920px] h-[80%] bg-gradient-to-br from-purple-600 via-purple-500 to-purple-400 rounded-lg relative overflow-hidden shadow-2xl">
           <div className="w-full h-full flex items-center justify-center">
             <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center">
               <span className="text-3xl font-bold text-purple-600">J</span>
             </div>
           </div>
-          <div className="absolute bottom-4 left-4">
+          <div className="absolute bottom-4 left-4 flex items-center space-x-2">
             <span className="text-white text-sm font-medium">Julia</span>
+            <AudioWave isActive={isJuliaSpeaking} />
           </div>
         </div>
 
-        {/* User Video Tile - decreased height by 25px and added 300px top padding */}
+        {/* User Video Tile */}
         <div className="absolute bottom-16 right-[150px] z-10 pt-[300px]">
           <VideoTile
             videoRef={videoRef}
@@ -91,6 +147,7 @@ const Index = () => {
             name="You"
             fallbackLetter="Y"
             className="w-[240px] h-[160px]"
+            isUserSpeaking={isUserSpeaking}
           />
         </div>
       </div>
