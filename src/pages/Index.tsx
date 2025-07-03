@@ -2,12 +2,10 @@
 import React, { useState, useRef, useEffect } from 'react';
 import VideoTile from '../components/VideoTile';
 import ControlPanel from '../components/ControlPanel';
-import ChatWindow from '../components/ChatWindow';
 
 const Index = () => {
   const [isMicMuted, setIsMicMuted] = useState(false);
   const [isCameraOff, setCameraOff] = useState(false);
-  const [isChatOpen, setIsChatOpen] = useState(false);
   const [stream, setStream] = useState<MediaStream | null>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
 
@@ -46,16 +44,14 @@ const Index = () => {
   };
 
   const toggleCamera = () => {
-    setCameraOff(!isCameraOff);
+    const newCameraState = !isCameraOff;
+    setCameraOff(newCameraState);
+    
     if (stream) {
       stream.getVideoTracks().forEach(track => {
-        track.enabled = isCameraOff;
+        track.enabled = !newCameraState;
       });
     }
-  };
-
-  const toggleChat = () => {
-    setIsChatOpen(!isChatOpen);
   };
 
   const endCall = () => {
@@ -74,8 +70,8 @@ const Index = () => {
 
       {/* Main Content */}
       <div className="flex-1 flex items-center justify-center relative">
-        {/* Main Video Area - Stuti Mishra */}
-        <div className="w-[60%] max-w-[720px] h-[70%] bg-gradient-to-br from-green-600 via-green-500 to-green-400 rounded-lg relative overflow-hidden shadow-2xl">
+        {/* Main Video Area - Stuti Mishra - increased width by 200px total (100px each side) and height by 25px */}
+        <div className="w-[70%] max-w-[920px] h-[75%] bg-gradient-to-br from-green-600 via-green-500 to-green-400 rounded-lg relative overflow-hidden shadow-2xl">
           <div className="w-full h-full flex items-center justify-center">
             <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center">
               <span className="text-3xl font-bold text-green-600">S</span>
@@ -94,6 +90,7 @@ const Index = () => {
             isMicMuted={isMicMuted}
             name="You"
             fallbackLetter="Y"
+            className="w-[240px] h-[160px]"
           />
         </div>
       </div>
@@ -102,15 +99,10 @@ const Index = () => {
       <ControlPanel
         isMicMuted={isMicMuted}
         isCameraOff={isCameraOff}
-        isChatOpen={isChatOpen}
         onToggleMic={toggleMic}
         onToggleCamera={toggleCamera}
-        onToggleChat={toggleChat}
         onEndCall={endCall}
       />
-
-      {/* Chat Window */}
-      <ChatWindow isOpen={isChatOpen} onClose={() => setIsChatOpen(false)} />
     </div>
   );
 };

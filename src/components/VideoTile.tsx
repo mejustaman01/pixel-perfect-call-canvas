@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { MicOff } from 'lucide-react';
 
 interface VideoTileProps {
@@ -17,8 +17,20 @@ const VideoTile: React.FC<VideoTileProps> = ({
   isMicMuted,
   name,
   fallbackLetter,
-  className = "w-[240px] h-[135px]"
+  className = "w-[240px] h-[160px]"
 }) => {
+  // Ensure video element updates when camera state changes
+  useEffect(() => {
+    if (videoRef?.current && videoRef.current.srcObject) {
+      const stream = videoRef.current.srcObject as MediaStream;
+      const videoTracks = stream.getVideoTracks();
+      
+      videoTracks.forEach(track => {
+        track.enabled = !isCameraOff;
+      });
+    }
+  }, [isCameraOff, videoRef]);
+
   return (
     <div className={`${className} bg-gradient-to-br from-gray-800 to-gray-700 rounded-lg relative overflow-hidden shadow-lg`}>
       {!isCameraOff && videoRef ? (
