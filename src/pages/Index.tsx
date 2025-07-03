@@ -82,15 +82,15 @@ const Index = () => {
           </div>
         </div>
 
-        {/* User Video Tile */}
-        <div className="absolute bottom-16 right-[150px] z-10">
+        {/* User Video Tile - increased height by 25px and added 100px top padding */}
+        <div className="absolute bottom-16 right-[150px] z-10 pt-[100px]">
           <VideoTile
             videoRef={videoRef}
             isCameraOff={isCameraOff}
             isMicMuted={isMicMuted}
             name="You"
             fallbackLetter="Y"
-            className="w-[240px] h-[160px]"
+            className="w-[240px] h-[185px]"
           />
         </div>
       </div>
