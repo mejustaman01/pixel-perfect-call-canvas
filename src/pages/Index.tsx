@@ -70,27 +70,27 @@ const Index = () => {
 
       {/* Main Content */}
       <div className="flex-1 flex items-center justify-center relative">
-        {/* Main Video Area - Stuti Mishra - increased width by 200px total (100px each side) and height by 25px */}
-        <div className="w-[70%] max-w-[920px] h-[75%] bg-gradient-to-br from-green-600 via-green-500 to-green-400 rounded-lg relative overflow-hidden shadow-2xl">
+        {/* Main Video Area - Julia - increased height by 25px and changed to purple */}
+        <div className="w-[70%] max-w-[920px] h-[80%] bg-gradient-to-br from-purple-600 via-purple-500 to-purple-400 rounded-lg relative overflow-hidden shadow-2xl">
           <div className="w-full h-full flex items-center justify-center">
             <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center">
-              <span className="text-3xl font-bold text-green-600">S</span>
+              <span className="text-3xl font-bold text-purple-600">J</span>
             </div>
           </div>
           <div className="absolute bottom-4 left-4">
-            <span className="text-white text-sm font-medium">Stuti Mishra</span>
+            <span className="text-white text-sm font-medium">Julia</span>
           </div>
         </div>
 
-        {/* User Video Tile - increased height by 25px and added 100px top padding */}
-        <div className="absolute bottom-16 right-[150px] z-10 pt-[100px]">
+        {/* User Video Tile - decreased height by 25px and added 300px top padding */}
+        <div className="absolute bottom-16 right-[150px] z-10 pt-[300px]">
           <VideoTile
             videoRef={videoRef}
             isCameraOff={isCameraOff}
             isMicMuted={isMicMuted}
             name="You"
             fallbackLetter="Y"
-            className="w-[240px] h-[185px]"
+            className="w-[240px] h-[160px]"
           />
         </div>
       </div>
