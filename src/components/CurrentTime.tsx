@@ -21,7 +21,7 @@ const CurrentTime: React.FC = () => {
   };
 
   return (
-    <div className="absolute bottom-4 left-4 z-20">
+    <div className="absolute bottom-[30px] left-4 z-20">
       <span className="text-black text-sm font-medium bg-white bg-opacity-30 px-2 py-1 rounded">
         {formatTime(currentTime)}
       </span>

@@ -126,7 +126,7 @@ const Index = () => {
       {/* Main Content */}
       <div className="flex-1 flex items-center justify-center relative">
         {/* Main Video Area - Julia */}
-        <div className="w-[70%] max-w-[920px] h-[80%] bg-gradient-to-br from-purple-600 via-purple-500 to-purple-400 rounded-lg relative overflow-hidden shadow-2xl">
+        <div className="w-[calc(70%-100px)] max-w-[820px] h-[80%] bg-gradient-to-br from-purple-600 via-purple-500 to-purple-400 rounded-lg relative overflow-hidden shadow-2xl" style={{ filter: 'drop-shadow(0 0 20px rgba(147, 51, 234, 0.05))' }}>
           <div className="w-full h-full flex items-center justify-center">
             <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center">
               <span className="text-3xl font-bold text-purple-600">J</span>
@@ -138,16 +138,18 @@ const Index = () => {
         </div>
 
         {/* User Video Tile */}
-        <div className="absolute bottom-16 right-[150px] z-10 pt-[300px]">
-          <VideoTile
-            videoRef={videoRef}
-            isCameraOff={isCameraOff}
-            isMicMuted={isMicMuted}
-            name="You"
-            fallbackLetter="Y"
-            className="w-[240px] h-[160px]"
-            isUserSpeaking={isUserSpeaking}
-          />
+        <div className="absolute bottom-16 right-[220px] z-10 pt-[300px]">
+          <div style={{ filter: 'drop-shadow(0 0 20px rgba(107, 114, 128, 0.05))' }}>
+            <VideoTile
+              videoRef={videoRef}
+              isCameraOff={isCameraOff}
+              isMicMuted={isMicMuted}
+              name="You"
+              fallbackLetter="Y"
+              className="w-[240px] h-[160px]"
+              isUserSpeaking={isUserSpeaking}
+            />
+          </div>
         </div>
       </div>
 

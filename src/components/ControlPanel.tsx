@@ -19,13 +19,13 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
 }) => {
   return (
     <div className="flex justify-center pb-4">
-      <div className="flex space-x-3">
+      <div className="flex space-x-3 bg-gray-500 bg-opacity-20 rounded-[10px] px-[100px] py-4">
         {/* Microphone Button */}
         <button
           onClick={onToggleMic}
           className={`p-2 rounded-full border-2 transition-all duration-200 ${
             isMicMuted
-              ? 'bg-gray-400 border-gray-400 text-white'
+              ? 'bg-black border-white text-white'
               : 'bg-white border-black text-black hover:bg-gray-50'
           }`}
         >
@@ -37,7 +37,7 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
           onClick={onToggleCamera}
           className={`p-2 rounded-full border-2 transition-all duration-200 ${
             isCameraOff
-              ? 'bg-gray-400 border-gray-400 text-white'
+              ? 'bg-black border-white text-white'
               : 'bg-white border-black text-black hover:bg-gray-50'
           }`}
         >
