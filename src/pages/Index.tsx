@@ -1,7 +1,7 @@
+
 import React, { useState, useRef, useEffect } from 'react';
 import VideoTile from '../components/VideoTile';
 import ControlPanel from '../components/ControlPanel';
-import AudioWave from '../components/AudioWave';
 import CurrentTime from '../components/CurrentTime';
 
 const Index = () => {
@@ -114,10 +114,10 @@ const Index = () => {
   };
 
   return (
-    <div className="h-screen bg-[#121212] flex flex-col overflow-hidden relative" style={{ height: '100vh' }}>
+    <div className="h-screen bg-white flex flex-col overflow-hidden relative" style={{ height: '100vh' }}>
       {/* Branding */}
       <div className="absolute top-4 left-4 z-20">
-        <span className="text-white text-sm font-medium">Lemonn.ai</span>
+        <span className="text-black text-sm font-medium">Lemonn.ai</span>
       </div>
 
       {/* Current Time */}
@@ -134,7 +134,6 @@ const Index = () => {
           </div>
           <div className="absolute bottom-4 left-4 flex items-center space-x-2">
             <span className="text-white text-sm font-medium">Julia</span>
-            <AudioWave isActive={isJuliaSpeaking} />
           </div>
         </div>
 

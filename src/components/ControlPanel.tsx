@@ -23,10 +23,10 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
         {/* Microphone Button */}
         <button
           onClick={onToggleMic}
-          className={`p-2 rounded-full transition-all duration-200 ${
+          className={`p-2 rounded-full border-2 transition-all duration-200 ${
             isMicMuted
-              ? 'bg-white hover:bg-gray-100 text-black'
-              : 'bg-gray-700 hover:bg-gray-600 text-white'
+              ? 'bg-gray-400 border-gray-400 text-white'
+              : 'bg-white border-black text-black hover:bg-gray-50'
           }`}
         >
           {isMicMuted ? <MicOff size={24} /> : <Mic size={24} />}
@@ -35,10 +35,10 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
         {/* Camera Button */}
         <button
           onClick={onToggleCamera}
-          className={`p-2 rounded-full transition-all duration-200 ${
+          className={`p-2 rounded-full border-2 transition-all duration-200 ${
             isCameraOff
-              ? 'bg-white hover:bg-gray-100 text-black'
-              : 'bg-gray-700 hover:bg-gray-600 text-white'
+              ? 'bg-gray-400 border-gray-400 text-white'
+              : 'bg-white border-black text-black hover:bg-gray-50'
           }`}
         >
           {isCameraOff ? <CameraOff size={24} /> : <Camera size={24} />}
