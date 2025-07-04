@@ -19,7 +19,7 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
 }) => {
   return (
     <div className="flex justify-center pb-4">
-      <div className="flex space-x-3 bg-gray-500 bg-opacity-20 rounded-[10px] px-[100px] py-4">
+      <div className="flex space-x-3">
         {/* Microphone Button */}
         <button
           onClick={onToggleMic}

@@ -117,7 +117,7 @@ const Index = () => {
     <div className="h-screen bg-white flex flex-col overflow-hidden relative" style={{ height: '100vh' }}>
       {/* Branding */}
       <div className="absolute top-4 left-4 z-20">
-        <span className="text-black text-sm font-medium">Lemonn.ai</span>
+        <span className="text-black text-lg font-medium">Lemonn.ai</span>
       </div>
 
       {/* Current Time */}
@@ -138,7 +138,7 @@ const Index = () => {
         </div>
 
         {/* User Video Tile */}
-        <div className="absolute bottom-16 right-[220px] z-10 pt-[300px]">
+        <div className="absolute bottom-16 right-[220px] z-10 pt-[400px]">
           <div style={{ filter: 'drop-shadow(0 0 20px rgba(107, 114, 128, 0.05))' }}>
             <VideoTile
               videoRef={videoRef}
