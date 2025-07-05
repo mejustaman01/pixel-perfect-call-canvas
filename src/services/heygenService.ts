@@ -22,6 +22,7 @@ export class HeyGenService {
     console.log('Using API base:', HEYGEN_API_BASE);
     
     try {
+      // Use the correct HeyGen Interactive Avatar API endpoint
       const response = await fetch(`${HEYGEN_API_BASE}/streaming.new`, {
         method: 'POST',
         headers: {
@@ -29,10 +30,10 @@ export class HeyGenService {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          quality: 'high',
+          quality: 'medium',
           avatar_name: avatarId,
           voice: {
-            voice_id: 'clara',
+            voice_id: 'b7d50908-b17c-442d-ad8d-810c63997ed9', // Clara voice ID
             rate: 1.0,
             emotion: 'happy'
           }
@@ -45,7 +46,17 @@ export class HeyGenService {
       if (!response.ok) {
         const errorText = await response.text();
         console.error('HeyGen API error response:', errorText);
-        throw new Error(`Failed to start HeyGen session: ${response.status} ${response.statusText} - ${errorText}`);
+        
+        // Handle specific error cases
+        if (response.status === 404) {
+          throw new Error('HeyGen API endpoint not found. Please check the API configuration.');
+        } else if (response.status === 401) {
+          throw new Error('Invalid API token. Please check your HeyGen API credentials.');
+        } else if (response.status === 403) {
+          throw new Error('Access denied. Please verify your HeyGen account permissions.');
+        } else {
+          throw new Error(`HeyGen API error: ${response.status} ${response.statusText} - ${errorText}`);
+        }
       }
 
       const data: HeyGenStartSessionResponse = await response.json();
@@ -57,6 +68,12 @@ export class HeyGenService {
       return data.data;
     } catch (error) {
       console.error('Error in startSession:', error);
+      
+      // Handle network errors
+      if (error instanceof TypeError && error.message.includes('fetch')) {
+        throw new Error('Network error: Unable to connect to HeyGen API. Please check your internet connection.');
+      }
+      
       throw error;
     }
   }
@@ -68,7 +85,9 @@ export class HeyGenService {
     try {
       // Create peer connection with ICE servers from HeyGen
       this.peerConnection = new RTCPeerConnection({
-        iceServers: session.ice_servers
+        iceServers: session.ice_servers || [{
+          urls: ['stun:stun.l.google.com:19302']
+        }]
       });
 
       console.log('Peer connection created with ICE servers:', session.ice_servers);
