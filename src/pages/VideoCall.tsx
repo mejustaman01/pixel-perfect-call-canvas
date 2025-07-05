@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import VideoTile from '../components/VideoTile';
@@ -6,12 +5,14 @@ import ControlPanel from '../components/ControlPanel';
 import CurrentTime from '../components/CurrentTime';
 import { useHeyGenAvatar } from '../hooks/useHeyGenAvatar';
 import { Button } from '@/components/ui/button';
+import { toast } from 'sonner';
 
 const VideoCall = () => {
   const [isMicMuted, setIsMicMuted] = useState(false);
   const [isCameraOff, setCameraOff] = useState(false);
   const [stream, setStream] = useState<MediaStream | null>(null);
   const [isUserSpeaking, setIsUserSpeaking] = useState(false);
+  const [cameraPermissionDenied, setCameraPermissionDenied] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
   const audioContextRef = useRef<AudioContext | null>(null);
   const analyserRef = useRef<AnalyserNode | null>(null);
@@ -70,19 +71,56 @@ const VideoCall = () => {
   useEffect(() => {
     const getUserMedia = async () => {
       try {
+        // Request camera permission explicitly
+        const permissions = await navigator.permissions.query({ name: 'camera' as PermissionName });
+        console.log('Camera permission status:', permissions.state);
+        
+        if (permissions.state === 'denied') {
+          setCameraPermissionDenied(true);
+          toast.error('Camera access denied. Please enable camera permissions in your browser settings.');
+          return;
+        }
+
         const mediaStream = await navigator.mediaDevices.getUserMedia({
-          video: true,
-          audio: true
+          video: {
+            width: { ideal: 1280 },
+            height: { ideal: 720 },
+            facingMode: 'user'
+          },
+          audio: {
+            echoCancellation: true,
+            noiseSuppression: true,
+            autoGainControl: true
+          }
         });
+        
+        console.log('Camera access granted, stream tracks:', mediaStream.getTracks().length);
         setStream(mediaStream);
+        setCameraPermissionDenied(false);
+        
         if (videoRef.current) {
           videoRef.current.srcObject = mediaStream;
         }
 
         // Set up audio analysis for voice activity detection
         setupAudioAnalysis(mediaStream);
+        
+        toast.success('Camera and microphone connected successfully!');
       } catch (error) {
         console.error('Error accessing camera:', error);
+        
+        if (error instanceof Error) {
+          if (error.name === 'NotAllowedError') {
+            setCameraPermissionDenied(true);
+            toast.error('Camera access denied. Please click the camera icon in your browser\'s address bar to allow access.');
+          } else if (error.name === 'NotFoundError') {
+            toast.error('No camera or microphone found. Please connect a device and refresh.');
+          } else if (error.name === 'NotReadableError') {
+            toast.error('Camera is already in use by another application.');
+          } else {
+            toast.error(`Camera error: ${error.message}`);
+          }
+        }
       }
     };
     
@@ -98,6 +136,27 @@ const VideoCall = () => {
       endHeyGenSession();
     };
   }, []);
+
+  const requestCameraPermission = async () => {
+    try {
+      const mediaStream = await navigator.mediaDevices.getUserMedia({
+        video: true,
+        audio: true
+      });
+      setStream(mediaStream);
+      setCameraPermissionDenied(false);
+      
+      if (videoRef.current) {
+        videoRef.current.srcObject = mediaStream;
+      }
+      
+      setupAudioAnalysis(mediaStream);
+      toast.success('Camera access granted!');
+    } catch (error) {
+      console.error('Error requesting camera permission:', error);
+      toast.error('Please enable camera permissions in your browser settings.');
+    }
+  };
 
   const setupAudioAnalysis = (mediaStream: MediaStream) => {
     try {
@@ -197,7 +256,12 @@ const VideoCall = () => {
                     <span className="text-3xl font-bold text-purple-600">A</span>
                   </div>
                   <p className="text-lg mb-2">Failed to connect to avatar</p>
-                  <p className="text-sm mb-4">{heyGenError}</p>
+                  <p className="text-sm mb-2 text-center px-4">
+                    {heyGenError.includes('ERR_BLOCKED_BY_CLIENT') 
+                      ? 'Connection blocked by ad blocker or browser extension. Please disable ad blockers for this site.'
+                      : heyGenError
+                    }
+                  </p>
                   <Button 
                     onClick={startHeyGenSession}
                     className="bg-white text-purple-600 hover:bg-gray-100"
@@ -222,18 +286,36 @@ const VideoCall = () => {
           </div>
         </div>
 
-        {/* User Video Tile */}
+        {/* User Video Tile or Permission Request */}
         <div className="absolute bottom-16 right-[220px] z-10 pt-[400px]">
           <div style={{ filter: 'drop-shadow(0 0 20px rgba(107, 114, 128, 0.05))' }}>
-            <VideoTile
-              videoRef={videoRef}
-              isCameraOff={isCameraOff}
-              isMicMuted={isMicMuted}
-              name="You"
-              fallbackLetter="Y"
-              className="w-[240px] h-[160px]"
-              isUserSpeaking={isUserSpeaking}
-            />
+            {cameraPermissionDenied ? (
+              <div className="w-[240px] h-[160px] bg-gradient-to-br from-gray-800 to-gray-700 rounded-lg flex flex-col items-center justify-center text-white p-4">
+                <div className="text-center mb-3">
+                  <p className="text-sm mb-2">Camera access required</p>
+                  <Button 
+                    onClick={requestCameraPermission}
+                    size="sm"
+                    className="bg-blue-600 hover:bg-blue-700"
+                  >
+                    Enable Camera
+                  </Button>
+                </div>
+                <p className="text-xs text-gray-300 text-center">
+                  Click the camera icon in your browser's address bar
+                </p>
+              </div>
+            ) : (
+              <VideoTile
+                videoRef={videoRef}
+                isCameraOff={isCameraOff}
+                isMicMuted={isMicMuted}
+                name="You"
+                fallbackLetter="Y"
+                className="w-[240px] h-[160px]"
+                isUserSpeaking={isUserSpeaking}
+              />
+            )}
           </div>
         </div>
       </div>
