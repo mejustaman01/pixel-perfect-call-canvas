@@ -4,17 +4,29 @@ import { useNavigate } from 'react-router-dom';
 import VideoTile from '../components/VideoTile';
 import ControlPanel from '../components/ControlPanel';
 import CurrentTime from '../components/CurrentTime';
+import { useHeyGenAvatar } from '../hooks/useHeyGenAvatar';
+import { Button } from '@/components/ui/button';
 
 const VideoCall = () => {
   const [isMicMuted, setIsMicMuted] = useState(false);
   const [isCameraOff, setCameraOff] = useState(false);
   const [stream, setStream] = useState<MediaStream | null>(null);
   const [isUserSpeaking, setIsUserSpeaking] = useState(false);
-  const [isJuliaSpeaking, setIsJuliaSpeaking] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
   const audioContextRef = useRef<AudioContext | null>(null);
   const analyserRef = useRef<AnalyserNode | null>(null);
   const navigate = useNavigate();
+
+  // HeyGen avatar integration
+  const {
+    videoRef: heygenVideoRef,
+    isConnected: isHeyGenConnected,
+    isLoading: isHeyGenLoading,
+    error: heyGenError,
+    startSession: startHeyGenSession,
+    speak: makeAvatarSpeak,
+    endSession: endHeyGenSession
+  } = useHeyGenAvatar('Anastasia_Chair_Sitting_public');
 
   // Check authentication
   useEffect(() => {
@@ -30,14 +42,30 @@ const VideoCall = () => {
     }
   }, [navigate]);
 
-  // Simulate Julia speaking randomly for demo purposes
+  // Start HeyGen session when component mounts
   useEffect(() => {
-    const juliaTimer = setInterval(() => {
-      setIsJuliaSpeaking(prev => !prev);
-    }, Math.random() * 3000 + 2000); // Random interval between 2-5 seconds
-
-    return () => clearInterval(juliaTimer);
+    startHeyGenSession();
   }, []);
+
+  // Demo avatar speaking
+  useEffect(() => {
+    if (isHeyGenConnected) {
+      const speakingTexts = [
+        "Hello! I'm Anastasia, your AI assistant.",
+        "How can I help you today?",
+        "I'm excited to chat with you!",
+        "What would you like to talk about?"
+      ];
+      
+      let textIndex = 0;
+      const speakingTimer = setInterval(() => {
+        makeAvatarSpeak(speakingTexts[textIndex]);
+        textIndex = (textIndex + 1) % speakingTexts.length;
+      }, 8000); // Speak every 8 seconds
+
+      return () => clearInterval(speakingTimer);
+    }
+  }, [isHeyGenConnected, makeAvatarSpeak]);
 
   useEffect(() => {
     const getUserMedia = async () => {
@@ -67,6 +95,7 @@ const VideoCall = () => {
       if (audioContextRef.current) {
         audioContextRef.current.close();
       }
+      endHeyGenSession();
     };
   }, []);
 
@@ -127,7 +156,7 @@ const VideoCall = () => {
     if (stream) {
       stream.getTracks().forEach(track => track.stop());
     }
-    // Navigate back to dashboard instead of just logging
+    endHeyGenSession();
     navigate('/dashboard');
   };
 
@@ -143,15 +172,53 @@ const VideoCall = () => {
 
       {/* Main Content */}
       <div className="flex-1 flex items-center justify-center relative">
-        {/* Main Video Area - Julia */}
+        {/* Main Video Area - HeyGen Avatar */}
         <div className="w-[calc(70%-100px)] max-w-[820px] h-[80%] bg-gradient-to-br from-purple-600 via-purple-500 to-purple-400 rounded-lg relative overflow-hidden shadow-2xl" style={{ filter: 'drop-shadow(0 0 20px rgba(147, 51, 234, 0.05))' }}>
-          <div className="w-full h-full flex items-center justify-center">
-            <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center">
-              <span className="text-3xl font-bold text-purple-600">J</span>
+          {isHeyGenConnected ? (
+            <video
+              ref={heygenVideoRef}
+              autoPlay
+              playsInline
+              className="w-full h-full object-cover"
+            />
+          ) : (
+            <div className="w-full h-full flex flex-col items-center justify-center text-white">
+              {isHeyGenLoading ? (
+                <>
+                  <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center mb-4">
+                    <span className="text-3xl font-bold text-purple-600">A</span>
+                  </div>
+                  <p className="text-lg mb-2">Connecting to Anastasia...</p>
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
+                </>
+              ) : heyGenError ? (
+                <>
+                  <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center mb-4">
+                    <span className="text-3xl font-bold text-purple-600">A</span>
+                  </div>
+                  <p className="text-lg mb-2">Failed to connect to avatar</p>
+                  <p className="text-sm mb-4">{heyGenError}</p>
+                  <Button 
+                    onClick={startHeyGenSession}
+                    className="bg-white text-purple-600 hover:bg-gray-100"
+                  >
+                    Retry Connection
+                  </Button>
+                </>
+              ) : (
+                <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center">
+                  <span className="text-3xl font-bold text-purple-600">A</span>
+                </div>
+              )}
             </div>
-          </div>
+          )}
           <div className="absolute bottom-4 left-4 flex items-center space-x-2">
-            <span className="text-white text-sm font-medium">Julia</span>
+            <span className="text-white text-sm font-medium">
+              {isHeyGenConnected ? 'Anastasia (Live)' : 'Anastasia'}
+            </span>
+            {isHeyGenConnected && (
+              <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+            )}
           </div>
         </div>
 
